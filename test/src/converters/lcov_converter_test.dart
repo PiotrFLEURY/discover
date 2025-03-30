@@ -71,7 +71,7 @@ end_of_record
 ''';
       verify(() => mockLcovFile.writeAsStringSync(expectedLcovContent))
           .called(1);
-      verify(() => logger.warn('File ${emptyFile.path} is empty.')).called(1);
+      verify(() => logger.warn('File empty.dart is empty.')).called(1);
     });
   });
 }
