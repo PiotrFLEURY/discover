@@ -3,7 +3,9 @@ import 'dart:io';
 import 'package:args/command_runner.dart';
 import 'package:cli_completion/cli_completion.dart';
 import 'package:discover/src/command_runner.dart';
+import 'package:discover/src/system/system_runner.dart';
 import 'package:discover/src/version.dart';
+import 'package:file/memory.dart';
 import 'package:mason_logger/mason_logger.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:pub_updater/pub_updater.dart';
@@ -14,6 +16,8 @@ class _MockLogger extends Mock implements Logger {}
 class _MockProgress extends Mock implements Progress {}
 
 class _MockPubUpdater extends Mock implements PubUpdater {}
+
+class _MockSystemRunner extends Mock implements SystemRunner {}
 
 const latestVersion = '0.0.0';
 
@@ -26,6 +30,8 @@ void main() {
     late PubUpdater pubUpdater;
     late Logger logger;
     late DiscoverCommandRunner commandRunner;
+    late MemoryFileSystem memoryFileSystem;
+    late SystemRunner systemRunner;
 
     setUp(() {
       pubUpdater = _MockPubUpdater();
@@ -36,9 +42,15 @@ void main() {
 
       logger = _MockLogger();
 
+      memoryFileSystem = MemoryFileSystem();
+
+      systemRunner = _MockSystemRunner();
+
       commandRunner = DiscoverCommandRunner(
         logger: logger,
         pubUpdater: pubUpdater,
+        fileSystem: memoryFileSystem,
+        systemRunner: systemRunner,
       );
     });
 
@@ -155,12 +167,25 @@ void main() {
       });
 
       test('enables verbose logging for sub commands', () async {
+        // GIVEN
+        memoryFileSystem.currentDirectory
+            .childDirectory('coverage')
+            .childFile('lcov.info')
+            .createSync(recursive: true);
+        memoryFileSystem.currentDirectory
+            .childDirectory('lib')
+            .childFile('main.dart')
+            .createSync(recursive: true);
+
+        // WHEN
         final result = await commandRunner.run([
           '--verbose',
           'scan',
           '--path',
           '.',
         ]);
+
+        // THEN
         expect(result, equals(ExitCode.success.code));
 
         verify(() => logger.detail('Argument information:')).called(1);
