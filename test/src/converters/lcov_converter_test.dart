@@ -22,13 +22,11 @@ void main() {
         logger: logger,
       );
       mockLcovFile = _MockFile();
-      when(() => mockLcovFile.path)
-          .thenReturn('coverage/lcov.info');
+      when(() => mockLcovFile.path).thenReturn('coverage/lcov.info');
     });
 
     test('writeLcovFile no files', () {
       // GIVEN
-
 
       // WHEN
       lcovConverter.writeLcovFile(
@@ -37,24 +35,23 @@ void main() {
       );
 
       // THEN
-      verify(() => logger.warn('No Dart files found.'))
-          .called(1);
+      verify(() => logger.warn('No Dart files found.')).called(1);
     });
 
     test('writeLcovFile should convert', () {
       // GIVEN
       memoryFileSystem.currentDirectory.childFile('main.dart')
         ..createSync(recursive: true)
-      ..writeAsStringSync(
-'''
+        ..writeAsStringSync('''
 void main() {
   print('Hello, world!');
 }
 ''');
       // create an empty file to ignore
-      final emptyFile = memoryFileSystem.currentDirectory.childFile('empty.dart')
-        ..createSync(recursive: true)
-        ..writeAsStringSync('');
+      final emptyFile =
+          memoryFileSystem.currentDirectory.childFile('empty.dart')
+            ..createSync(recursive: true)
+            ..writeAsStringSync('');
 
       // WHEN
       lcovConverter.writeLcovFile(
@@ -63,8 +60,7 @@ void main() {
       );
 
       // THEN
-      const expectedLcovContent =
-'''
+      const expectedLcovContent = '''
 SF:main.dart
 DA:1,0
 DA:2,0
@@ -75,8 +71,7 @@ end_of_record
 ''';
       verify(() => mockLcovFile.writeAsStringSync(expectedLcovContent))
           .called(1);
-      verify(() => logger.warn('File ${emptyFile.path} is empty.'))
-          .called(1);
+      verify(() => logger.warn('File ${emptyFile.path} is empty.')).called(1);
     });
   });
 }
