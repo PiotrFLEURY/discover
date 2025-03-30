@@ -49,8 +49,8 @@ void main() {
 ''');
       // create an empty file to ignore
       memoryFileSystem.currentDirectory.childFile('empty.dart')
-            ..createSync(recursive: true)
-            ..writeAsStringSync('');
+        ..createSync(recursive: true)
+        ..writeAsStringSync('');
 
       // WHEN
       lcovConverter.writeLcovFile(
