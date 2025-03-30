@@ -1,3 +1,4 @@
 .github/
 .dart_tool/
+build/
 flutter_example/
