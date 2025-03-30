@@ -4,7 +4,6 @@ import 'dart:io';
 /// Utils class to run system commands
 ///
 class SystemRunner {
-
   ///
   /// Runs flutter test --coverage command
   ///
