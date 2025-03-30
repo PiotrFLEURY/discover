@@ -48,8 +48,7 @@ void main() {
 }
 ''');
       // create an empty file to ignore
-      final emptyFile =
-          memoryFileSystem.currentDirectory.childFile('empty.dart')
+      memoryFileSystem.currentDirectory.childFile('empty.dart')
             ..createSync(recursive: true)
             ..writeAsStringSync('');
 
