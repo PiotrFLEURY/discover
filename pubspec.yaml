@@ -1,7 +1,7 @@
 name: discover
 description: Discover your real coverage with Dart and Flutter.
 version: 0.0.1
-publish_to: none
+repository: https://github.com/PiotrFLEURY/discover
 
 environment:
   sdk: ^3.5.0
