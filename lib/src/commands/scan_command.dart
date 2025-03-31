@@ -3,6 +3,7 @@ import 'package:discover/src/converters/lcov_converter.dart';
 import 'package:discover/src/extensions/extensions.dart';
 import 'package:discover/src/system/system_runner.dart';
 import 'package:file/file.dart';
+import 'package:glob/glob.dart';
 import 'package:mason_logger/mason_logger.dart';
 
 /// {@template scan_command}
@@ -52,7 +53,10 @@ class ScanCommand extends Command<int> {
       _logger.err('lib directory does not exist');
       return ExitCode.noInput.code;
     }
+
     final dartFiles = listDartFiles(libDirectory);
+
+    applyIgnoreFile(projectDirectory, dartFiles);
 
     if (dartFiles.isEmpty) {
       _logger.err('No Dart files found in ${libDirectory.path}');
@@ -104,13 +108,39 @@ class ScanCommand extends Command<int> {
     return ExitCode.success.code;
   }
 
-  Iterable<File> listDartFiles(Directory libDirectory) {
-    final dartFiles = libDirectory
+  void applyIgnoreFile(
+    Directory projectDirectory,
+    List<File> dartFiles,
+  ) {
+    final ignoreFile = projectDirectory.childFile('.discoverignore');
+    if (ignoreFile.existsSync()) {
+      final ignorePatterns = ignoreFile.readAsLinesSync();
+      _logger.info('Applying ignore patterns from .discoverignore:');
+      for (final pattern in ignorePatterns) {
+        _logger.info(pattern);
+        final glob = Glob(pattern);
+        dartFiles.removeWhere((file) {
+          final matching = glob.matches(file.libPath);
+          if (matching) {
+            _logger.info(
+              'Ignoring file ${file.libPath} matching pattern $pattern',
+            );
+          }
+          return matching;
+        });
+      }
+    } else {
+      _logger.info('No .discoverignore file found.');
+    }
+  }
+
+  List<File> listDartFiles(Directory libDirectory) {
+    return libDirectory
         .listSync(recursive: true)
         .where((entity) => entity.path.endsWith('.dart'))
         .map((entity) => entity as File)
-        .where((file) => file.isNotExportLibrary());
-    return dartFiles;
+        .where((file) => file.isNotExportLibrary())
+        .toList();
   }
 
   List<String> _readSourceFilesFromCoverage(File coverageFile) {
