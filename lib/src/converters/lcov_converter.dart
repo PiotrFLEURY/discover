@@ -8,8 +8,8 @@ import 'package:mason_logger/mason_logger.dart';
 ///
 /// SF:path/to/file.dart
 /// DA:1,0
-/// LF:<total lines>
-/// LH:<lines hit>
+/// LF:[total lines]
+/// LH:[lines hit]
 /// end_of_record
 ///
 class LcovConverter {

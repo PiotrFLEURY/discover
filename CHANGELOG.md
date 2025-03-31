@@ -9,6 +9,7 @@
 ## Fix
 
 - Fix lcov file name
+- Fix documentation angle brackets
 
 # 0.0.1
 
