@@ -1,4 +1,5 @@
 import 'package:discover/src/command_runner.dart';
+import 'package:discover/src/commands/commands.dart';
 import 'package:discover/src/converters/lcov_converter.dart';
 import 'package:discover/src/extensions/file_system_entity_extension.dart';
 import 'package:discover/src/system/system_runner.dart';
@@ -347,6 +348,50 @@ Usage: discover scan [arguments]
 Run "discover help" to see global options.''',
         ),
       ).called(1);
+    });
+  });
+  group('discoverignore', () {
+    test('should ignore files in .discoverignore', () {
+      // GIVEN
+      final scanCommand = ScanCommand(
+        logger: _MockLogger(),
+        fileSystem: MemoryFileSystem(),
+        lcovConverter: _MockLcovConverter(),
+        systemRunner: _MockSystemRunner(),
+      );
+
+      final currentDirectory = MemoryFileSystem().currentDirectory;
+      final libDirectory = currentDirectory.childDirectory('lib')
+        ..createSync(recursive: true);
+      libDirectory.childFile('foo.dart')
+        ..createSync(recursive: true)
+        ..writeAsStringSync('void main() {}');
+      libDirectory.childFile('foo.g.dart')
+        ..createSync(recursive: true)
+        ..writeAsStringSync('void generatedMethod() {}');
+      currentDirectory.childFile('.discoverignore')
+        ..createSync(recursive: true)
+        ..writeAsStringSync('**/*.g.dart');
+
+      final dartFiles = libDirectory
+          .listSync(recursive: true)
+          .map((it) => it as File)
+          .toList();
+
+      // WHEN
+      scanCommand.applyIgnoreFile(currentDirectory, dartFiles);
+
+      // THEN
+      expect(dartFiles, isNotEmpty);
+      expect(dartFiles.length, 1);
+      expect(
+        dartFiles.map((it) => it.libPath).contains('lib/foo.dart'),
+        isTrue,
+      );
+      expect(
+        dartFiles.map((it) => it.libPath).contains('lib/foo.g.dart'),
+        isFalse,
+      );
     });
   });
 }

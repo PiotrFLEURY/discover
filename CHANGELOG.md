@@ -1,5 +1,11 @@
 # Changelog
 
+# 0.2.0
+
+## Feature
+
+- Add support for `.discoverignore` file
+
 # 0.1.0
 
 ## Feature
