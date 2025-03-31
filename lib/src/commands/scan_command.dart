@@ -133,7 +133,7 @@ class ScanCommand extends Command<int> {
     _logger.info(
       'Generating lcov file for Dart files not listed in coverage file.',
     );
-    final lcovFile = coverageDirectory.childFile('discovery-lcov.info');
+    final lcovFile = coverageDirectory.childFile('discover-lcov.info');
     _lcovConverter.writeLcovFile(dartFilesNotInCoverage, lcovFile);
   }
 
