@@ -228,6 +228,50 @@ end_of_record
       ).called(1);
     });
 
+    test('scan should ignore export library files', () async {
+      // GIVEN
+      final currentDirectory = memoryFileSystem.currentDirectory;
+      final libDirectory = currentDirectory.childDirectory('lib')
+        ..createSync(recursive: true);
+      libDirectory.childFile('main.dart')
+        ..createSync(recursive: true)
+        ..writeAsStringSync('void main() {}');
+      libDirectory.childFile('library.dart')
+        ..createSync(recursive: true)
+        ..writeAsStringSync('export "foo.dart";')
+        ..writeAsStringSync('library library_name;');
+      final coverageDirectory = currentDirectory.childDirectory('coverage')
+        ..createSync(recursive: true);
+      coverageDirectory.childFile('lcov.info')
+        ..createSync(recursive: true)
+        ..writeAsStringSync('''
+SF:lib/main.dart
+DA:3,0
+LF:1
+LH:0
+end_of_record
+''');
+
+      // WHEN
+      final exitCode = await commandRunner.run(['scan']);
+
+      // THEN
+      expect(exitCode, ExitCode.success.code);
+
+      verify(
+        () => logger.info('Coverage file found.'),
+      ).called(1);
+      verify(
+        () => logger.info(
+          'All Dart files are listed in the coverage file.',
+        ),
+      ).called(1);
+
+      verifyNever(() => lcovConverter.writeLcovFile(any(), any()));
+      verifyNever(() => systemRunner.runGenHTML(currentDirectory.path));
+      verifyNever(() => systemRunner.runOpenHtmlReport(currentDirectory.path));
+    });
+
     test('scan no coverage', () async {
       // GIVEN
       final currentDirectory = memoryFileSystem.currentDirectory;
