@@ -1,5 +1,11 @@
 # Changelog
 
+# 0.3.0
+
+## Feature
+
+- ignore lines not supposed to be covered
+
 # 0.2.0
 
 ## Feature

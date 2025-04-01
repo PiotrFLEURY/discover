@@ -1,34 +1,34 @@
+import 'package:discover/src/models/code_line.dart';
 import 'package:file/file.dart';
 
 extension FileExtension on File {
-  List<String> readAsCodeLinesSync() {
+  List<CodeLine> readAsCodeLinesSync() {
     final lines = readAsLinesSync();
     return lines
-        .map((line) => line.trim())
-        .where((line) => line.isNotEmpty && !line.startsWith('//'))
+        .asMap()
+        .entries
+        .map(
+          (entry) => CodeLine(
+            code: entry.value,
+            lineNumber: entry.key + 1,
+          ),
+        )
         .toList();
   }
 
   bool isNotEmpty() {
     return existsSync() &&
         readAsCodeLinesSync()
-            .where((line) => line.trim().isNotEmpty)
+            .where((line) => line.isNotEmpty && !line.isComment)
             .isNotEmpty;
   }
 
   bool isExportLibrary() {
     return isNotEmpty() &&
         readAsCodeLinesSync()
-            .every((line) => _isExport(line) || _isLibrary(line));
+            .where((line) => line.isNotEmpty)
+            .every((line) => line.isExport || line.isLibrary);
   }
 
   bool isNotExportLibrary() => !isExportLibrary();
-
-  bool _isExport(String line) {
-    return line.startsWith('export');
-  }
-
-  bool _isLibrary(String line) {
-    return line.startsWith('library');
-  }
 }

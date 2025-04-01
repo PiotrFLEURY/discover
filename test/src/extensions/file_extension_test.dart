@@ -17,7 +17,7 @@ void main() {
       // THEN
       expect(codeLines, isEmpty);
     });
-    test('empty lines should be ignored', () {
+    test('empty lines should be identified', () {
       // GIVEN
       final file = fileSystem.file('test.dart')
         ..writeAsStringSync(
@@ -30,34 +30,38 @@ void main() {
       final codeLines = file.readAsCodeLinesSync();
 
       // THEN
-      expect(codeLines, isEmpty);
+      expect(codeLines, isNotEmpty);
+      expect(codeLines[0].isEmpty, true);
     });
-    test('comments should be ignored', () {
+    test('comments should be identified', () {
       // GIVEN
       final file = fileSystem.file('test.dart')
         ..writeAsStringSync(
           '''
-        // This is a comment
-        // Another comment
-        // Yet another comment
-        ''',
+// This is a comment
+// Another comment
+// Yet another comment
+''',
         );
 
       // WHEN
       final codeLines = file.readAsCodeLinesSync();
 
       // THEN
-      expect(codeLines, isEmpty);
+      expect(codeLines, isNotEmpty);
+      expect(codeLines[0].isComment, true);
+      expect(codeLines[1].isComment, true);
+      expect(codeLines[2].isComment, true);
     });
     test('code should be returned', () {
       // GIVEN
       final file = fileSystem.file('test.dart')
         ..writeAsStringSync(
           '''
-        void main() {
-          print('Hello, world!');
-        }
-        ''',
+void main() {
+  print('Hello, world!');
+}
+''',
         );
 
       // WHEN
@@ -66,25 +70,25 @@ void main() {
       // THEN
       expect(codeLines, isNotEmpty);
       expect(codeLines.length, 3);
-      expect(codeLines[0], 'void main() {');
-      expect(codeLines[1], "print('Hello, world!');");
-      expect(codeLines[2], '}');
+      expect(codeLines[0].code, 'void main() {');
+      expect(codeLines[1].trim(), "print('Hello, world!');");
+      expect(codeLines[2].code, '}');
     });
     test('complex example', () {
       // GIVEN
       final file = fileSystem.file('test.dart')
         ..writeAsStringSync(
           '''
-          
-        /// This is a documentation comment
-        void main() {
-        
-          // This is a comment
-          print('Hello, world!');
-          
-        }
-        
-        ''',
+
+/// This is a documentation comment
+void main() {
+
+  // This is a comment
+  print('Hello, world!');
+
+}
+
+''',
         );
 
       // WHEN
@@ -92,10 +96,16 @@ void main() {
 
       // THEN
       expect(codeLines, isNotEmpty);
-      expect(codeLines.length, 3);
-      expect(codeLines[0], 'void main() {');
-      expect(codeLines[1], "print('Hello, world!');");
-      expect(codeLines[2], '}');
+      expect(codeLines.length, 9);
+      expect(codeLines[0].isEmpty, true);
+      expect(codeLines[1].isComment, true);
+      expect(codeLines[2].code, 'void main() {');
+      expect(codeLines[3].isEmpty, true);
+      expect(codeLines[4].isComment, true);
+      expect(codeLines[5].trim(), "print('Hello, world!');");
+      expect(codeLines[6].isEmpty, true);
+      expect(codeLines[7].code, '}');
+      expect(codeLines[8].isEmpty, true);
     });
   });
   group('isNotEmpty', () {
