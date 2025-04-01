@@ -33,18 +33,47 @@ dart pub global activate --source=path <path to this package>
 
 ## Usage
 
+### Perform coverage scan
+
 ```sh
 # Scan command
 $ discover scan
 
 # Scan command option
 $ discover scan --path <dart_project_path>
+```
 
+### Tooling commands
+
+```sh
 # Show CLI version
 $ discover --version
 
 # Show usage help
 $ discover --help
+```
+
+### Ignore files
+
+You can ignore files by creating a `.discoverignore` file in the root of your project.
+
+```
+|-- android
+|-- ios
+|-- lib
+|-- linux
+|-- macos
+|-- test
+|-- windows
+|-- .discoverignore
+```
+
+Sample `.discoverignore` file:
+
+```
+lib/**/*.g.dart
+lib/**/*.freezed.dart
+lib/view/**/*.dart
 ```
 
 ## Running Tests with coverage 🧪

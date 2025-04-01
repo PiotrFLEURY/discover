@@ -2,6 +2,10 @@
 
 # 0.3.0
 
+## Doc
+
+- Document `.discoverignore` file
+
 ## Feature
 
 - ignore lines not supposed to be covered
