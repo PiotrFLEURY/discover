@@ -158,7 +158,7 @@ class ScanCommand extends Command<int> {
 
   void generateLcovFile(
     Directory coverageDirectory,
-    List<FileSystemEntity> dartFilesNotInCoverage,
+    List<File> dartFilesNotInCoverage,
   ) {
     _logger.info(
       'Generating lcov file for Dart files not listed in coverage file.',

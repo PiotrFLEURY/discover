@@ -1,6 +1,19 @@
-import 'package:discover/src/extensions/file_system_entity_extension.dart';
+import 'package:discover/src/extensions/extensions.dart';
+import 'package:discover/src/models/code_line.dart';
 import 'package:file/file.dart';
 import 'package:mason_logger/mason_logger.dart';
+
+const importRegex = '^import\\s+["\'](.*)["\'];\$';
+const partRegex = '^\\s*part\\s*(of)*\\s+["\'](.*)["\'];\$';
+const commentRegex = r'^\s*//.*$';
+const classDeclarationRegex = r'^\s*class\s+(\w+[<]*.*[>]*\s*)*\s*{*$';
+const mixinDeclarationRegex = r'^\s*mixin\s+(\w+[<]*.*[>]*\s*)*\s*{$';
+const extensionDeclarationRegex = r'^\s*extension\s+(\w+)\s+on\s+(\w+)\s*{$';
+const closingStatementRegex = r'^\s*([\)\]};],*)+\s*$';
+const returnStatementRegex = r'^\s*return\s+.*;$';
+const constructorDeclarationRegex =
+    r'^\s*(const\s)*[A-Z](\w+)([\.]*\w*)*\s*\(.*$';
+const methodDeclarationRegex = r'^\s*(\w+)(<\w+>)*\s+([a-z]\w+)+\s*\(.*$';
 
 /// Utils class to convert Dart code coverage to lcov format
 ///
@@ -17,10 +30,28 @@ class LcovConverter {
     Logger? logger,
   }) : _logger = logger ?? Logger();
 
+  /// Logger instance
   final Logger _logger;
 
+  /// List of regex patterns to ignore
+  final List<RegExp> ignoredLines = [
+    RegExp(importRegex),
+    RegExp(partRegex),
+    RegExp(commentRegex),
+    RegExp(classDeclarationRegex),
+    RegExp(mixinDeclarationRegex),
+    RegExp(extensionDeclarationRegex),
+    RegExp(closingStatementRegex),
+    RegExp(returnStatementRegex),
+    RegExp(constructorDeclarationRegex),
+    RegExp(methodDeclarationRegex),
+  ];
+
+  ///
+  /// Writes the LCOV file to the specified path
+  ///
   void writeLcovFile(
-    List<FileSystemEntity> dartFiles,
+    List<File> dartFiles,
     File lcovFile,
   ) {
     if (dartFiles.isEmpty) {
@@ -28,22 +59,21 @@ class LcovConverter {
       return;
     }
     _logger.info('Writing LCOV file to ${lcovFile.path}');
-    final dartFilesMap = <String, List<String>>{};
+    final dartFilesMap = <String, List<CodeLine>>{};
     for (final file in dartFiles) {
-      if (file is File) {
-        final lines = file.readAsLinesSync();
-        if (lines.isEmpty) {
-          _logger.warn('File ${file.path} is empty.');
-        } else {
-          dartFilesMap[file.libPath] = lines;
-        }
+      final lines = file.readAsCodeLinesSync();
+      filterIgnoredLines(lines);
+      if (lines.isEmpty) {
+        _logger.warn('File ${file.path} is empty.');
+      } else {
+        dartFilesMap[file.libPath] = lines;
       }
     }
     final lcovContent = _generateLcov(dartFilesMap);
     lcovFile.writeAsStringSync(lcovContent);
   }
 
-  String _generateLcov(Map<String, List<String>> files) {
+  String _generateLcov(Map<String, List<CodeLine>> files) {
     _logger.info('Converting ${files.length} files to LCOV format.');
     final buffer = StringBuffer();
 
@@ -61,7 +91,10 @@ class LcovConverter {
     return buffer.toString();
   }
 
-  String _fileToLcov(String filePath, List<String> lines) {
+  ///
+  /// Converts a single file to LCOV format
+  ///
+  String _fileToLcov(String filePath, List<CodeLine> lines) {
     _logger.info('Converting file: $filePath');
     final buffer = StringBuffer()..writeln('SF:$filePath');
 
@@ -69,7 +102,7 @@ class LcovConverter {
     for (var i = 0; i < lines.length; i++) {
       final line = lines[i];
       if (line.isNotEmpty) {
-        buffer.writeln('DA:${i + 1},0');
+        buffer.writeln('DA:${line.lineNumber},0');
         lineCount++;
       }
     }
@@ -81,5 +114,21 @@ class LcovConverter {
     _logger.info('Converted $lineCount lines in file: $filePath');
 
     return buffer.toString();
+  }
+
+  ///
+  /// Filters out lines that match the ignored patterns
+  ///
+  /// Ignored patterns include:
+  /// imports, part, part of, class, mixin, extension, closing statement,
+  /// return statement, functions and constructors
+  ///
+  void filterIgnoredLines(List<CodeLine> lines) {
+    for (var i = lines.length - 1; i >= 0; i--) {
+      final line = lines[i];
+      if (ignoredLines.any((regex) => regex.hasMatch(line.code))) {
+        lines.removeAt(i);
+      }
+    }
   }
 }
