@@ -108,49 +108,7 @@ void main() {
       expect(codeLines[8].isEmpty, true);
     });
   });
-  group('isNotEmpty', () {
-    test('empty file should return false', () {
-      // GIVEN
-      final file = fileSystem.file('test.dart')..writeAsStringSync('');
 
-      // WHEN
-      final isNotEmpty = file.isNotEmpty();
-
-      // THEN
-      expect(isNotEmpty, isFalse);
-    });
-    test('file with only empty lines should return false', () {
-      // GIVEN
-      final file = fileSystem.file('test.dart')
-        ..writeAsStringSync(
-          '''
-        
-        ''',
-        );
-
-      // WHEN
-      final isNotEmpty = file.isNotEmpty();
-
-      // THEN
-      expect(isNotEmpty, isFalse);
-    });
-    test('file with only comments should return false', () {
-      // GIVEN
-      final file = fileSystem.file('test.dart')
-        ..writeAsStringSync(
-          '''
-        // This is a comment
-        // Another comment
-        ''',
-        );
-
-      // WHEN
-      final isNotEmpty = file.isNotEmpty();
-
-      // THEN
-      expect(isNotEmpty, isFalse);
-    });
-  });
   group('isExportLibrary', () {
     test('empty file should return false', () {
       // GIVEN

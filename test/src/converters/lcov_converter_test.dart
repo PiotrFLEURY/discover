@@ -78,6 +78,69 @@ end_of_record
           .called(1);
       verify(() => logger.warn('File empty.dart is empty.')).called(1);
     });
+    test('real life example', () {
+      // GIVEN
+      memoryFileSystem.currentDirectory.childFile('main.dart')
+        ..createSync(recursive: true)
+        ..writeAsStringSync('''
+import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:freenance/app.dart';
+
+Future<void> main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+
+  await SystemChrome.setPreferredOrientations([
+    DeviceOrientation.portraitUp,
+    DeviceOrientation.portraitDown,
+  ]);
+
+  runApp(
+    ProviderScope(
+      child: const Freenance(),
+    ),
+  );
+}
+
+''');
+
+      // WHEN
+      final startTime = DateTime.now();
+      lcovConverter.writeLcovFile(
+        memoryFileSystem.currentDirectory
+            .listSync()
+            .map((it) => it as File)
+            .toList(),
+        mockLcovFile,
+      );
+      final endTime = DateTime.now();
+
+      // THEN
+      const expectedLcovContent = '''
+SF:main.dart
+DA:9,0
+DA:10,0
+DA:11,0
+DA:14,0
+DA:16,0
+LF:5
+LH:0
+end_of_record
+''';
+      final captured =
+          verify(() => mockLcovFile.writeAsStringSync(captureAny())).captured;
+      expect(
+        captured.single,
+        expectedLcovContent,
+      );
+      final duration = endTime.difference(startTime);
+      expect(
+        duration.inMilliseconds,
+        lessThan(10),
+        reason: 'Conversion should be less than 1 second but got $duration ms',
+      );
+    });
   });
   group('ignore lines', () {
     test('should ignore imports', () {

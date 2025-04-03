@@ -68,8 +68,6 @@ class ScanCommand extends Command<int> {
       }
     }
 
-    _logger.info('Scan completed successfully.');
-
     // Search for coverage file
     final coverageDirectory = projectDirectory.childDirectory('coverage');
     if (!coverageDirectory.existsSync()) {

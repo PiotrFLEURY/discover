@@ -1,19 +1,8 @@
+import 'package:discover/src/converters/dart_parser.dart' as parser;
 import 'package:discover/src/extensions/extensions.dart';
 import 'package:discover/src/models/code_line.dart';
 import 'package:file/file.dart';
 import 'package:mason_logger/mason_logger.dart';
-
-const importRegex = '^import\\s+["\'](.*)["\'];\$';
-const partRegex = '^\\s*part\\s*(of)*\\s+["\'](.*)["\'];\$';
-const commentRegex = r'^\s*//.*$';
-const classDeclarationRegex = r'^\s*class\s+(\w+[<]*.*[>]*\s*)*\s*{*$';
-const mixinDeclarationRegex = r'^\s*mixin\s+(\w+[<]*.*[>]*\s*)*\s*{$';
-const extensionDeclarationRegex = r'^\s*extension\s+(\w+)\s+on\s+(\w+)\s*{$';
-const closingStatementRegex = r'^\s*([\)\]};],*)+\s*$';
-const returnStatementRegex = r'^\s*return\s+.*;$';
-const constructorDeclarationRegex =
-    r'^\s*(const\s)*[A-Z](\w+)([\.]*\w*)*\s*\(.*$';
-const methodDeclarationRegex = r'^\s*(\w+)(<\w+>)*\s+([a-z]\w+)+\s*\(.*$';
 
 /// Utils class to convert Dart code coverage to lcov format
 ///
@@ -32,20 +21,6 @@ class LcovConverter {
 
   /// Logger instance
   final Logger _logger;
-
-  /// List of regex patterns to ignore
-  final List<RegExp> ignoredLines = [
-    RegExp(importRegex),
-    RegExp(partRegex),
-    RegExp(commentRegex),
-    RegExp(classDeclarationRegex),
-    RegExp(mixinDeclarationRegex),
-    RegExp(extensionDeclarationRegex),
-    RegExp(closingStatementRegex),
-    RegExp(returnStatementRegex),
-    RegExp(constructorDeclarationRegex),
-    RegExp(methodDeclarationRegex),
-  ];
 
   ///
   /// Writes the LCOV file to the specified path
@@ -126,7 +101,7 @@ class LcovConverter {
   void filterIgnoredLines(List<CodeLine> lines) {
     for (var i = lines.length - 1; i >= 0; i--) {
       final line = lines[i];
-      if (ignoredLines.any((regex) => regex.hasMatch(line.code))) {
+      if (parser.shouldIgnoreLine(line.code)) {
         lines.removeAt(i);
       }
     }
