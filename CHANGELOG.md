@@ -10,6 +10,10 @@
 
 - ignore lines not supposed to be covered
 
+## Fix
+
+- improve performances
+
 # 0.2.0
 
 ## Feature

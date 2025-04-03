@@ -1,3 +1,4 @@
+import 'package:discover/src/converters/dart_parser.dart' as parser;
 import 'package:discover/src/models/code_line.dart';
 import 'package:file/file.dart';
 
@@ -16,18 +17,14 @@ extension FileExtension on File {
         .toList();
   }
 
-  bool isNotEmpty() {
-    return existsSync() &&
-        readAsCodeLinesSync()
-            .where((line) => line.isNotEmpty && !line.isComment)
-            .isNotEmpty;
-  }
-
   bool isExportLibrary() {
-    return isNotEmpty() &&
-        readAsCodeLinesSync()
+    final content = readAsStringSync().trim();
+    return content.isNotEmpty &&
+        content
+            .split('\n')
+            .map((line) => line.trim())
             .where((line) => line.isNotEmpty)
-            .every((line) => line.isExport || line.isLibrary);
+            .every((line) => parser.isExport(line) || parser.isLibrary(line));
   }
 
   bool isNotExportLibrary() => !isExportLibrary();
