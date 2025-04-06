@@ -47,7 +47,7 @@ class ScanCommand extends Command<int> {
     final path = argResults?['path'] as String;
     final projectDirectory = path == '.'
         ? _fileSystem.currentDirectory
-        : _fileSystem.directory(path);
+        : _fileSystem.currentDirectory.childDirectory(path);
     final libDirectory = projectDirectory.childDirectory('lib');
     if (!libDirectory.existsSync()) {
       _logger.err('lib directory does not exist');
@@ -170,8 +170,14 @@ class ScanCommand extends Command<int> {
   }
 
   void generateHtmlReport(String projectPath) {
-    _systemRunner
-      ..runGenHTML(projectPath)
-      ..runOpenHtmlReport(projectPath);
+    _systemRunner.runGenHTML(projectPath);
+    final fullPath = '$projectPath/coverage/html/index.html';
+    final reportLink = link(
+      message: fullPath,
+      uri: Uri.parse(
+        'file://$fullPath',
+      ),
+    );
+    _logger.success('HTML report generated at $reportLink');
   }
 }

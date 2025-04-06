@@ -44,20 +44,4 @@ class SystemRunner {
       throw Exception('Failed to run genhtml: ${process.stderr}');
     }
   }
-
-  void runOpenHtmlReport(
-    String projectPath,
-  ) {
-    final process = Process.runSync(
-      'open',
-      [
-        'coverage/html/index.html',
-      ],
-      workingDirectory: projectPath,
-    );
-
-    if (process.exitCode != 0) {
-      throw Exception('Failed to open HTML report: ${process.stderr}');
-    }
-  }
 }

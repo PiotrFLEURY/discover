@@ -1,5 +1,11 @@
 # Changelog
 
+# 0.3.1
+
+## Fix
+
+- Replace HTML report opening by logs with link
+
 # 0.3.0
 
 ## Doc
