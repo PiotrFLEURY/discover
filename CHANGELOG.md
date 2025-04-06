@@ -5,6 +5,7 @@
 ## Fix
 
 - Replace HTML report opening by logs with link
+- Delete old `discover-lcov.info` file before generating it
 
 # 0.3.0
 

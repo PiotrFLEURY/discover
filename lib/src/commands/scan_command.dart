@@ -162,6 +162,9 @@ class ScanCommand extends Command<int> {
       'Generating lcov file for Dart files not listed in coverage file.',
     );
     final lcovFile = coverageDirectory.childFile('discover-lcov.info');
+    if (lcovFile.existsSync()) {
+      lcovFile.deleteSync();
+    }
     _lcovConverter.writeLcovFile(dartFilesNotInCoverage, lcovFile);
   }
 
