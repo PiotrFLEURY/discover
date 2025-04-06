@@ -224,9 +224,6 @@ end_of_record
       verify(
         () => systemRunner.runGenHTML(currentDirectory.path),
       ).called(1);
-      verify(
-        () => systemRunner.runOpenHtmlReport(currentDirectory.path),
-      ).called(1);
     });
 
     test('scan should ignore export library files', () async {
@@ -270,7 +267,6 @@ end_of_record
 
       verifyNever(() => lcovConverter.writeLcovFile(any(), any()));
       verifyNever(() => systemRunner.runGenHTML(currentDirectory.path));
-      verifyNever(() => systemRunner.runOpenHtmlReport(currentDirectory.path));
     });
 
     test('scan no coverage', () async {
