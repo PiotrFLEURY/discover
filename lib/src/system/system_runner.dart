@@ -35,7 +35,8 @@ class SystemRunner {
       [
         '-o',
         'coverage/html',
-        'coverage/**lcov.info',
+        'coverage/lcov.info',
+        'coverage/discover-lcov.info',
       ],
       workingDirectory: projectPath,
     );
