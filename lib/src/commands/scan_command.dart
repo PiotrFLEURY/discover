@@ -56,7 +56,7 @@ class ScanCommand extends Command<int> {
 
     final dartFiles = listDartFiles(libDirectory);
 
-    applyIgnoreFile(projectDirectory, dartFiles);
+    final ignorePatterns = applyIgnoreFile(projectDirectory, dartFiles);
 
     if (dartFiles.isEmpty) {
       _logger.err('No Dart files found in ${libDirectory.path}');
@@ -98,6 +98,10 @@ class ScanCommand extends Command<int> {
         _logger.info(file.libPath);
       }
       generateLcovFile(coverageDirectory, dartFilesNotInCoverage);
+      removeIgnorePatternsFromLcov(
+        coverageDirectory,
+        ignorePatterns,
+      );
       generateHtmlReport(projectDirectory.path);
     } else {
       _logger.info('All Dart files are listed in the coverage file.');
@@ -106,7 +110,7 @@ class ScanCommand extends Command<int> {
     return ExitCode.success.code;
   }
 
-  void applyIgnoreFile(
+  List<String> applyIgnoreFile(
     Directory projectDirectory,
     List<File> dartFiles,
   ) {
@@ -127,8 +131,10 @@ class ScanCommand extends Command<int> {
           return matching;
         });
       }
+      return ignorePatterns;
     } else {
       _logger.info('No .discoverignore file found.');
+      return [];
     }
   }
 
@@ -170,6 +176,24 @@ class ScanCommand extends Command<int> {
 
   void _generateCoverage(String projectPath) {
     _systemRunner.runFlutterCoverage(projectPath);
+  }
+
+  void removeIgnorePatternsFromLcov(
+    Directory coverageDirectory,
+    List<String> ignorePatterns,
+  ) {
+    if (ignorePatterns.isEmpty) {
+      _logger.info('No patterns to ignore.');
+      return;
+    }
+    _logger.info(
+      'Removing ignored patterns from LCOV file in ${coverageDirectory.path}.',
+    );
+    _systemRunner.runLcovRemove(
+      coverageDirectory.path,
+      ignorePatterns,
+    );
+    _logger.info('Removed ignored patterns from LCOV file.');
   }
 
   void generateHtmlReport(String projectPath) {

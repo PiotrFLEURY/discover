@@ -390,4 +390,49 @@ Run "discover help" to see global options.''',
       );
     });
   });
+  group('removeIgnorePatternsFromLcov', () {
+    final logger = _MockLogger();
+    final systemRunner = _MockSystemRunner();
+    final scanCommand = ScanCommand(
+      logger: logger,
+      fileSystem: MemoryFileSystem(),
+      lcovConverter: _MockLcovConverter(),
+      systemRunner: systemRunner,
+    );
+    test('should do nothing if empty', () {
+      // GIVEN
+      final coverageDirectory =
+          MemoryFileSystem().currentDirectory.childDirectory('coverage');
+      final ignorePatterns = <String>[];
+
+      // WHEN
+      scanCommand.removeIgnorePatternsFromLcov(
+        coverageDirectory,
+        ignorePatterns,
+      );
+
+      // THEN
+      verifyNever(() => systemRunner.runLcovRemove(any(), any()));
+      verify(() => logger.info('No patterns to ignore.'));
+    });
+    test('should run command', () {
+      // GIVEN
+      final coverageDirectory =
+          MemoryFileSystem().currentDirectory.childDirectory('coverage');
+      final ignorePatterns = <String>['**/*.g.dart'];
+      when(
+        () => systemRunner.runLcovRemove(any(), any()),
+      ).thenAnswer((_) async {});
+
+      // WHEN
+      scanCommand.removeIgnorePatternsFromLcov(
+        coverageDirectory,
+        ignorePatterns,
+      );
+
+      // THEN
+      verify(() => systemRunner.runLcovRemove(any(), any()));
+      verify(() => logger.info('Removed ignored patterns from LCOV file.'));
+    });
+  });
 }
