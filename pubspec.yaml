@@ -1,6 +1,6 @@
 name: discover
 description: Discover your real coverage with Flutter including not tested Dart files.
-version: 0.3.2
+version: 0.4.0
 repository: https://github.com/PiotrFLEURY/discover
 
 environment:

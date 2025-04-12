@@ -1,5 +1,11 @@
 # Changelog
 
+# 0.4.0
+
+## Feature
+
+- Remove ignored files from original lcov.info tracefile
+
 # 0.3.2
 
 ## Fix

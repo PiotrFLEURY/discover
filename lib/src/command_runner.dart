@@ -32,7 +32,8 @@ class DiscoverCommandRunner extends CompletionCommandRunner<int> {
   })  : _logger = logger ?? Logger(),
         _pubUpdater = pubUpdater ?? PubUpdater(),
         _fileSystem = fileSystem ?? const LocalFileSystem(),
-        _systemRunner = systemRunner ?? SystemRunner(),
+        _systemRunner =
+            systemRunner ?? SystemRunner(logger: logger ?? Logger()),
         _lcovConverter = lcovConverter ?? LcovConverter(),
         super(executableName, description) {
     // Add root options and flags
