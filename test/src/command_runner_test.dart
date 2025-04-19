@@ -177,6 +177,15 @@ void main() {
             .childFile('main.dart')
             .createSync(recursive: true);
 
+        when(() => systemRunner.runFlutterCoverage(any())).thenAnswer(
+          (_) async => memoryFileSystem.currentDirectory
+              .childDirectory('coverage')
+              .childFile('lcov.info')
+              .createSync(recursive: true),
+        );
+
+        when(() => logger.progress(any())).thenReturn(_MockProgress());
+
         // WHEN
         final result = await commandRunner.run([
           '--verbose',

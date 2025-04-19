@@ -70,10 +70,11 @@ class ScanCommand extends Command<int> {
 
     // Search for coverage file
     final coverageDirectory = projectDirectory.childDirectory('coverage');
-    if (!coverageDirectory.existsSync()) {
+    if (coverageDirectory.existsSync()) {
       _logger.info('No coverage directory found.');
-      _generateCoverage(projectDirectory.path);
+      coverageDirectory.deleteSync(recursive: true);
     }
+    _generateCoverage(projectDirectory.path);
 
     final coverageFile = coverageDirectory.childFile('lcov.info');
     if (coverageFile.existsSync()) {
@@ -97,15 +98,22 @@ class ScanCommand extends Command<int> {
       for (final file in dartFilesNotInCoverage) {
         _logger.info(file.libPath);
       }
-      generateLcovFile(coverageDirectory, dartFilesNotInCoverage);
-      removeIgnorePatternsFromLcov(
-        coverageDirectory,
-        ignorePatterns,
-      );
-      generateHtmlReport(projectDirectory.path);
     } else {
       _logger.info('All Dart files are listed in the coverage file.');
     }
+
+    final discoverLcovExists = generateLcovFile(
+      coverageDirectory,
+      dartFilesNotInCoverage,
+    );
+    removeIgnorePatternsFromLcov(
+      coverageDirectory,
+      ignorePatterns,
+    );
+    generateHtmlReport(
+      projectDirectory.path,
+      discoverLcovExists: discoverLcovExists,
+    );
 
     return ExitCode.success.code;
   }
@@ -160,7 +168,7 @@ class ScanCommand extends Command<int> {
     return sourceFiles;
   }
 
-  void generateLcovFile(
+  bool generateLcovFile(
     Directory coverageDirectory,
     List<File> dartFilesNotInCoverage,
   ) {
@@ -171,10 +179,18 @@ class ScanCommand extends Command<int> {
     if (lcovFile.existsSync()) {
       lcovFile.deleteSync();
     }
-    _lcovConverter.writeLcovFile(dartFilesNotInCoverage, lcovFile);
+    if (dartFilesNotInCoverage.isNotEmpty) {
+      _lcovConverter.writeLcovFile(dartFilesNotInCoverage, lcovFile);
+      return true;
+    } else {
+      return false;
+    }
   }
 
   void _generateCoverage(String projectPath) {
+    _logger
+      ..info('Generating coverage for project at $projectPath')
+      ..info('Running flutter test --coverage');
     _systemRunner.runFlutterCoverage(projectPath);
   }
 
@@ -196,8 +212,14 @@ class ScanCommand extends Command<int> {
     _logger.info('Removed ignored patterns from LCOV file.');
   }
 
-  void generateHtmlReport(String projectPath) {
-    _systemRunner.runGenHTML(projectPath);
+  void generateHtmlReport(
+    String projectPath, {
+    required bool discoverLcovExists,
+  }) {
+    _systemRunner.runGenHTML(
+      projectPath,
+      discoverLcovExists: discoverLcovExists,
+    );
     final fullPath = '$projectPath/coverage/html/index.html';
     final reportLink = link(
       message: fullPath,

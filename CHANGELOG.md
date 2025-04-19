@@ -9,6 +9,7 @@
 ## Fix
 
 - Fix [#26 lines with export-statement not ignored](https://github.com/PiotrFLEURY/discover/issues/26)
+- Fix [#25 HTML report not always generated](https://github.com/PiotrFLEURY/discover/issues/25)
 
 # 0.3.2
 

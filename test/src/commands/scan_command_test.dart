@@ -119,6 +119,12 @@ LF:1
 LH:0
 end_of_record
 ''');
+      when(() => systemRunner.runFlutterCoverage(any())).thenAnswer(
+        (_) async => memoryFileSystem.currentDirectory
+            .childDirectory('coverage')
+            .childFile('lcov.info')
+            .createSync(recursive: true),
+      );
 
       // WHEN
       final exitCode = await commandRunner.run(['scan']);
@@ -144,15 +150,18 @@ end_of_record
         ..writeAsStringSync('void main() {}');
       final coverageDirectory = currentDirectory.childDirectory('coverage')
         ..createSync(recursive: true);
-      coverageDirectory.childFile('lcov.info')
-        ..createSync(recursive: true)
-        ..writeAsStringSync('''
+
+      when(() => systemRunner.runFlutterCoverage(any())).thenAnswer(
+        (_) async => coverageDirectory.childFile('lcov.info')
+          ..createSync(recursive: true)
+          ..writeAsStringSync('''
 SF:lib/main.dart
 DA:3,0
 LF:1
 LH:0
 end_of_record
-''');
+'''),
+      );
 
       // WHEN
       final exitCode = await commandRunner.run(['scan']);
@@ -190,6 +199,12 @@ LF:1
 LH:0
 end_of_record
 ''');
+      when(() => systemRunner.runFlutterCoverage(any())).thenAnswer(
+        (_) async => memoryFileSystem.currentDirectory
+            .childDirectory('coverage')
+            .childFile('lcov.info')
+            .createSync(recursive: true),
+      );
 
       // WHEN
       final exitCode = await commandRunner.run(['scan']);
@@ -222,7 +237,51 @@ end_of_record
         () => lcovConverter.writeLcovFile(any(), any()),
       ).called(1);
       verify(
-        () => systemRunner.runGenHTML(currentDirectory.path),
+        () => systemRunner.runGenHTML(
+          currentDirectory.path,
+          discoverLcovExists: true,
+        ),
+      ).called(1);
+    });
+
+    test('scan should always generate HTML report', () async {
+      // GIVEN
+      final currentDirectory = memoryFileSystem.currentDirectory;
+      final libDirectory = currentDirectory.childDirectory('lib')
+        ..createSync(recursive: true);
+      libDirectory.childFile('main.dart')
+        ..createSync(recursive: true)
+        ..writeAsStringSync('void main() {}');
+      final coverageDirectory = currentDirectory.childDirectory('coverage')
+        ..createSync(recursive: true);
+
+      when(() => systemRunner.runFlutterCoverage(any())).thenAnswer(
+        (_) async => coverageDirectory.childFile('lcov.info')
+          ..createSync(recursive: true)
+          ..writeAsStringSync('''
+SF:lib/main.dart
+DA:3,0
+LF:1
+LH:0
+end_of_record
+'''),
+      );
+
+      // WHEN
+      final exitCode = await commandRunner.run(['scan']);
+
+      // THEN
+      expect(exitCode, ExitCode.success.code);
+
+      verify(
+        () => logger.info('Coverage file found.'),
+      ).called(1);
+
+      verify(
+        () => systemRunner.runGenHTML(
+          currentDirectory.path,
+          discoverLcovExists: false,
+        ),
       ).called(1);
     });
 
@@ -240,15 +299,18 @@ end_of_record
         ..writeAsStringSync('library library_name;');
       final coverageDirectory = currentDirectory.childDirectory('coverage')
         ..createSync(recursive: true);
-      coverageDirectory.childFile('lcov.info')
-        ..createSync(recursive: true)
-        ..writeAsStringSync('''
+
+      when(() => systemRunner.runFlutterCoverage(any())).thenAnswer(
+        (_) async => coverageDirectory.childFile('lcov.info')
+          ..createSync(recursive: true)
+          ..writeAsStringSync('''
 SF:lib/main.dart
 DA:3,0
 LF:1
 LH:0
 end_of_record
-''');
+'''),
+      );
 
       // WHEN
       final exitCode = await commandRunner.run(['scan']);
@@ -266,27 +328,12 @@ end_of_record
       ).called(1);
 
       verifyNever(() => lcovConverter.writeLcovFile(any(), any()));
-      verifyNever(() => systemRunner.runGenHTML(currentDirectory.path));
-    });
-
-    test('scan no coverage', () async {
-      // GIVEN
-      final currentDirectory = memoryFileSystem.currentDirectory;
-      final libDirectory = currentDirectory.childDirectory('lib')
-        ..createSync(recursive: true);
-      libDirectory.childFile('foo.dart')
-        ..createSync(recursive: true)
-        ..writeAsStringSync('void main() {}');
-
-      // WHEN
-      final exitCode = await commandRunner.run(['scan']);
-
-      // THEN
-      expect(exitCode, ExitCode.noInput.code);
-
-      verify(
-        () => logger.info('No coverage directory found.'),
-      ).called(1);
+      verifyNever(
+        () => systemRunner.runGenHTML(
+          currentDirectory.path,
+          discoverLcovExists: true,
+        ),
+      );
     });
 
     test('scan path', () async {
@@ -302,15 +349,18 @@ end_of_record
 
       final coverageDirectory = exampleDirectory.childDirectory('coverage')
         ..createSync(recursive: true);
-      coverageDirectory.childFile('lcov.info')
-        ..createSync(recursive: true)
-        ..writeAsStringSync('''
+
+      when(() => systemRunner.runFlutterCoverage(any())).thenAnswer(
+        (_) async => coverageDirectory.childFile('lcov.info')
+          ..createSync(recursive: true)
+          ..writeAsStringSync('''
 SF:lib/foo.dart
 DA:3,0
 LF:1
 LH:0
 end_of_record
-''');
+'''),
+      );
 
       // WHEN
       final exitCode = await commandRunner.run(['scan', '--path', 'example']);
