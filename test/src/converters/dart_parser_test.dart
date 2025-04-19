@@ -67,5 +67,125 @@ Future<void> main() async {
         );
       }
     });
+    test('comments', () {
+      // GIVEN
+      const line = ' // This is a comment with a trailing space';
+
+      // WHEN
+      final shouldIgnore = parser.shouldIgnoreLine(line);
+
+      // THEN
+      expect(shouldIgnore, isTrue);
+    });
+    test('import', () {
+      // GIVEN
+      const line = "import 'package:flutter/material.dart';";
+
+      // WHEN
+      final shouldIgnore = parser.shouldIgnoreLine(line);
+
+      // THEN
+      expect(shouldIgnore, isTrue);
+    });
+    test('export', () {
+      // GIVEN
+      const line = "export 'package:flutter/foundation.dart';";
+
+      // WHEN
+      final shouldIgnore = parser.shouldIgnoreLine(line);
+
+      // THEN
+      expect(shouldIgnore, isTrue);
+    });
+    test('part', () {
+      // GIVEN
+      const line = "part 'car.g.dart';";
+
+      // WHEN
+      final shouldIgnore = parser.shouldIgnoreLine(line);
+
+      // THEN
+      expect(shouldIgnore, isTrue);
+    });
+    test('class', () {
+      // GIVEN
+      const line = 'class Car {';
+
+      // WHEN
+      final shouldIgnore = parser.shouldIgnoreLine(line);
+
+      // THEN
+      expect(shouldIgnore, isTrue);
+    });
+    test('mixin', () {
+      // GIVEN
+      const line = 'mixin Vehicle {';
+
+      // WHEN
+      final shouldIgnore = parser.shouldIgnoreLine(line);
+
+      // THEN
+      expect(shouldIgnore, isTrue);
+    });
+    test('extension', () {
+      // GIVEN
+      const line = 'extension Vehicle on Car {';
+
+      // WHEN
+      final shouldIgnore = parser.shouldIgnoreLine(line);
+
+      // THEN
+      expect(shouldIgnore, isTrue);
+    });
+    test('return', () {
+      // GIVEN
+      const line = 'return Car();';
+
+      // WHEN
+      final shouldIgnore = parser.shouldIgnoreLine(line);
+
+      // THEN
+      expect(shouldIgnore, isTrue);
+    });
+    test('closing curly brace', () {
+      // GIVEN
+      const line = '}';
+
+      // WHEN
+      final shouldIgnore = parser.shouldIgnoreLine(line);
+
+      // THEN
+      expect(shouldIgnore, isTrue);
+    });
+    test('closing parenthesis', () {
+      // GIVEN
+      const line = ');';
+
+      // WHEN
+      final shouldIgnore = parser.shouldIgnoreLine(line);
+
+      // THEN
+      expect(shouldIgnore, isTrue);
+    });
+    test('method', () {
+      // GIVEN
+      const line = 'void startEngine() {';
+
+      // WHEN
+      final shouldIgnore = parser.shouldIgnoreLine(line);
+
+      // THEN
+      expect(shouldIgnore, isTrue);
+    });
+    test('field', () {
+      // GIVEN
+      const line = 'final String brand;';
+
+      // WHEN
+      final shouldIgnore = parser.shouldIgnoreLine(line);
+
+      // THEN
+      expect(shouldIgnore, isFalse);
+    });
   });
 }

@@ -6,6 +6,10 @@
 
 - Remove ignored files from original lcov.info tracefile
 
+## Fix
+
+- Fix [#26 lines with export-statement not ignored](https://github.com/PiotrFLEURY/discover/issues/26)
+
 # 0.3.2
 
 ## Fix

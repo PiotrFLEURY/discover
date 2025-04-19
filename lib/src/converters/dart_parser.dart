@@ -33,6 +33,7 @@ bool shouldIgnoreLine(String line) {
   return trimmedLine.isEmpty ||
       trimmedLine.startsWith('//') ||
       trimmedLine.startsWith('import') ||
+      trimmedLine.startsWith('export') ||
       trimmedLine.startsWith('part') ||
       trimmedLine.startsWith('class') ||
       trimmedLine.startsWith('mixin') ||
