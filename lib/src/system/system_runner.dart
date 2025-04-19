@@ -36,15 +36,17 @@ class SystemRunner {
   /// Runs genhtml command to generate HTML report from LCOV file
   ///
   void runGenHTML(
-    String projectPath,
-  ) {
+    String projectPath, {
+    required bool discoverLcovExists,
+  }) {
     final process = Process.runSync(
       'genhtml',
       [
         '-o',
         'coverage/html',
         'coverage/lcov.info',
-        'coverage/discover-lcov.info',
+        if (discoverLcovExists) 'coverage/discover-lcov.info',
+        '--keep-descriptions',
       ],
       workingDirectory: projectPath,
     );
