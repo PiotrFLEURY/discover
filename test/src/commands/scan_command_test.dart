@@ -222,7 +222,48 @@ end_of_record
         () => lcovConverter.writeLcovFile(any(), any()),
       ).called(1);
       verify(
-        () => systemRunner.runGenHTML(currentDirectory.path),
+        () => systemRunner.runGenHTML(
+          currentDirectory.path,
+          discoverLcovExists: true,
+        ),
+      ).called(1);
+    });
+
+    test('scan should always generate HTML report', () async {
+      // GIVEN
+      final currentDirectory = memoryFileSystem.currentDirectory;
+      final libDirectory = currentDirectory.childDirectory('lib')
+        ..createSync(recursive: true);
+      libDirectory.childFile('main.dart')
+        ..createSync(recursive: true)
+        ..writeAsStringSync('void main() {}');
+      final coverageDirectory = currentDirectory.childDirectory('coverage')
+        ..createSync(recursive: true);
+      coverageDirectory.childFile('lcov.info')
+        ..createSync(recursive: true)
+        ..writeAsStringSync('''
+SF:lib/main.dart
+DA:3,0
+LF:1
+LH:0
+end_of_record
+''');
+
+      // WHEN
+      final exitCode = await commandRunner.run(['scan']);
+
+      // THEN
+      expect(exitCode, ExitCode.success.code);
+
+      verify(
+        () => logger.info('Coverage file found.'),
+      ).called(1);
+
+      verify(
+        () => systemRunner.runGenHTML(
+          currentDirectory.path,
+          discoverLcovExists: false,
+        ),
       ).called(1);
     });
 
@@ -266,7 +307,12 @@ end_of_record
       ).called(1);
 
       verifyNever(() => lcovConverter.writeLcovFile(any(), any()));
-      verifyNever(() => systemRunner.runGenHTML(currentDirectory.path));
+      verifyNever(
+        () => systemRunner.runGenHTML(
+          currentDirectory.path,
+          discoverLcovExists: true,
+        ),
+      );
     });
 
     test('scan no coverage', () async {
